@@ -1,0 +1,10 @@
+ultralytics>=8.2.0
+opencv-python>=4.8
+numpy>=1.23
+PyYAML>=6.0
+tqdm>=4.66
+scipy>=1.10
+onnx>=1.14
+onnxsim>=0.4.36
+pyserial>=3.5
+pillow>=10.0

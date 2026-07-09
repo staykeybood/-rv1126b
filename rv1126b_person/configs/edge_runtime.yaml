@@ -1,0 +1,174 @@
+# VisionGuard AI 本地/板端运行配置。
+# 平时主要改这个文件；命令行参数只用于临时覆盖。
+
+# 训练好的 YOLOv8 人体检测权重路径。
+# 电脑上可以用 .pt；板端如果使用 ONNX/RKNN，就把这里改成对应模型文件路径。
+weights: "E:/dataset_person/runs/train/person_yolov8n_416_edge/weights/best.pt"
+
+# 输入源：0 表示默认摄像头，也可以写视频路径、RTSP 地址或 HTTP 视频流。
+source: "0"
+
+# YOLO 输入尺寸。416 比 640 更适合 RV1126B 这类端侧设备。
+imgsz: 416
+
+# 推理设备。电脑上可写 0/cuda:0/cpu；不确定时保持 null。
+device: null
+
+# 每隔几帧检测一次。1=每帧检测；2=每 2 帧检测 1 次，板端更省。
+process_every: 2
+
+# 摄像头采集参数。0 表示不强制设置，使用摄像头默认值。
+camera_width: 0
+camera_height: 0
+camera_fps: 0.0
+
+# -----------------------------
+# 显示与日志
+# -----------------------------
+
+# 每隔多少秒打印一次运行 FPS。0 表示不打印。
+fps_log_interval: 2.0
+
+# 是否隐藏画面里的 FPS。
+hide_fps: false
+
+# 预览窗口大小。0 表示跟随摄像头原始比例自动设置。
+display_width: 0
+display_height: 0
+
+# 右上角报警栏最多显示几条。太多会遮挡画面，建议 2-3。
+max_alert_rows: 3
+
+# 中文字体不可用或中文绘制太慢时，可改 true 使用英文界面。
+english_ui: false
+
+# 是否显示 OpenCV 预览窗口。板端无屏运行时建议 false。
+show: false
+
+# 是否保存带框检测视频。null 表示不保存。
+save_video: null
+
+# -----------------------------
+# 检测与跟踪
+# -----------------------------
+
+# 人体检测置信度，越高误检越少，但漏检会增加。
+conf: 0.25
+
+# NMS 阈值，用来合并重叠检测框。
+nms_iou: 0.45
+
+# 下面几项会影响 track_id 稳定性。
+# ID 经常变：可以适当降低 track_thresh/new_track_thresh，或增大 max_age。
+track_thresh: 0.25
+low_thresh: 0.10
+new_track_thresh: 0.30
+track_iou: 0.15
+
+# 目标短暂消失后保留多少帧。值越大越不容易丢 ID，但也可能保留误检。
+max_age: 90
+min_hits: 1
+
+# -----------------------------
+# ROI 禁区与警戒线
+# -----------------------------
+
+# 禁区和警戒线配置文件。相对路径是相对于项目根目录。
+roi_file: "configs/roi_example.json"
+
+# 也可以在这里直接写 ROI，例如 "100,120;520,120;560,420;80,420"。
+# 一般推荐改 roi_file，坐标更清楚。
+roi: null
+
+# 也可以在这里直接写警戒线，例如 "200,300;600,300"。
+line: null
+
+# 越线方向：any 表示两个方向都报警。
+# 其他可选：positive_to_negative / negative_to_positive。
+line_direction: "any"
+
+# -----------------------------
+# 异常行为规则
+# -----------------------------
+
+# 区域入侵：脚底中心点连续进入 ROI 达到多少帧后报警。
+intrusion_min_frames: 3
+
+# 异常停留：同一个 track_id 在 ROI 内低速停留超过多少秒后报警。
+loiter_seconds: 20.0
+
+# 异常停留的低速阈值，单位是像素/秒。低于该速度认为基本没移动。
+stationary_speed: 12.0
+
+# 徘徊：在 ROI 内持续多少秒后，开始判断是不是来回移动。
+wandering_seconds: 20.0
+
+# 徘徊：统计时间内累计行走距离至少多少像素。
+wandering_min_path: 150.0
+
+# 徘徊：最终位移小于多少像素，说明是在附近来回走而不是正常路过。
+wandering_max_displacement: 200.0
+
+# 多次靠近敏感区域：统计窗口，单位秒。
+repeat_approach_window: 60.0
+
+# 多次靠近敏感区域：窗口内进入 ROI 达到几次后报警。
+repeat_approach_count: 3
+
+# 快速奔跑：脚底中心点速度超过多少像素/秒。
+# 如果走路也被识别成奔跑，就把这个值调大，比如 260 或 320。
+running_speed: 200.0
+
+# 快速奔跑：连续多少帧超过速度阈值才报警，避免一帧抖动误报。
+running_min_frames: 8
+
+# 遮挡/贴近摄像头：人体框面积占整幅画面的比例阈值。
+camera_block_ratio: 0.55
+
+# 遮挡/贴近摄像头：超过面积阈值持续多少秒后报警。
+camera_block_seconds: 5.0
+
+# 非工作时间人员出现：工作时间范围。
+work_start: "08:00"
+work_end: "18:00"
+
+# 工作日，ISO 格式：1=周一，7=周日。
+workdays: "1,2,3,4,5"
+
+# 是否关闭非工作时间报警。
+disable_after_hours: false
+
+# 没有 ROI 时是否允许全画面异常停留检测。一般保持 false。
+loiter_full_frame: false
+
+# 同一 track_id 的同一种报警冷却时间，避免频繁弹同一条报警。
+event_cooldown: 30.0
+
+# 非工作时间人员出现的全局冷却时间，建议比普通报警更长。
+after_hours_cooldown: 60.0
+
+# -----------------------------
+# 事件上报
+# -----------------------------
+
+# 人数统计上报间隔。
+summary_interval: 1.0
+
+# 本地 JSONL 日志，每一行是一条报警或人数统计。
+events_jsonl: "runs/track/events.jsonl"
+
+# UDP/TCP/串口上报。不使用就保持 null。
+# 示例：udp: "192.168.1.10:9000"
+udp: null
+tcp: null
+serial_port: null
+serial_baud: 115200
+
+# -----------------------------
+# 图像增强
+# -----------------------------
+
+# 弱光/逆光时可打开 enhance；噪声明显时再打开 denoise。
+# 板端算力紧张，建议默认关闭。
+enhance: false
+denoise: false

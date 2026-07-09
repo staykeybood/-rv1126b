@@ -1,0 +1,19 @@
+{
+  "_comment": "ROI 配置文件。JSON 不能写 # 注释，所以这里用 _comment 字段说明；程序只读取 name、points、line_name、line。",
+  "name": "restricted_area",
+  "_name_comment": "禁区名称，会写入报警事件的 region 字段。",
+  "points": [
+    [200, 185],
+    [480, 185],
+    [480, 395],
+    [200, 395]
+  ],
+  "_points_comment": "禁区多边形坐标，按摄像头画面像素填写。人体脚底中心点进入这个多边形后，才会触发入侵、停留、徘徊、多次靠近等 ROI 相关规则。",
+  "line_name": "fence_line",
+  "_line_name_comment": "警戒线名称，会写入 line_crossing 报警事件。",
+  "line": [
+    [200, 395],
+    [480, 395]
+  ],
+  "_line_comment": "警戒线的两个端点坐标。人体脚底中心点从线的一侧移动到另一侧时，触发穿越警戒线报警。"
+}
